@@ -375,3 +375,5 @@
       (else (cond
               ((equal? (car l) s) (cdr l))
               (else (cons (car l) (rember** s (cdr l)))))))))
+
+
