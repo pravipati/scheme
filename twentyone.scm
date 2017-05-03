@@ -21,7 +21,6 @@
 			(bf rest-of-deck)))))
 
   (define (best-total hand)
-    ;💡 what if we just add 10 at the end if the hand is < or = 11?
     (define (card-to-num card)
       (cond ((equal? (string-ref card 0) #\a) 1)
             ((or (equal? (string-ref card 0) #\a)
@@ -40,13 +39,12 @@
             ((equal? (string-ref (string (car hand)) 0) #\a) #t)
             (else (has-ace? (cdr hand)))))
 
-    (if (and (or (equal? (total hand) 11)
-                 (< (total hand) 21))
+    (if (and (> 22 (+ 10 (total hand)))
              (has-ace? hand))
         (+ 10 (total hand))
       (total hand))
   )
-
+  
   (let ((deck (make-deck)))
     (play-customer (se (first deck) (first (bf deck)))
 		   (first (bf (bf deck)))
