@@ -21,28 +21,30 @@
 			(bf rest-of-deck)))))
 
   (define (best-total hand)
+    ;💡 what if we just add 10 at the end if the hand is < or = 11?
+    (define (card-to-num card)
+      (cond ((equal? (string-ref card 0) #\a) 1)
+            ((or (equal? (string-ref card 0) #\a)
+                 (equal? (string-ref card 0) #\j)
+                 (equal? (string-ref card 0) #\q)
+                 (equal? (string-ref card 0) #\k))
+              10)
+            (else (string->number (substring card 0 (- (string-length card) 1))))))
 
-    (define (ace-shuffle hand)
-      (cond ((null? hand) '())
-            ((equal? (string-ref (string (car hand)) 0) #\a) 
-              (append (ace-shuffle (cdr hand)) (cons (car hand) '())))
-            (else (append (cons (car hand) '()) (ace-shuffle (cdr hand))))))
-    
-    ;pass ace-shuffled hand to helper
-    (define (best-total-helper shuffled-hand running-total)
+    (define (total hand)
+      (if (null? hand) 0
+        (+ (card-to-num (string (car hand))) (total (cdr hand)))))
 
-      (cond ((null? shuffled-hand) running-total)
-            ((and (equal? (length shuffled-hand) 1)
-                        (equal? (card-to-num (string (car shuffled-hand))) 1)
-                        (< 21 (+ 11 running-total))) 
-                   (+ 1 running-total))
-            ((and (equal? (length shuffled-hand) 1)
-                        (equal? (card-to-num (string (car shuffled-hand))) 1)
-                        (> 21 (+ 11 running-total))) 
-                   (+ 11 running-total))
-            (else (best-total-helper (cdr shuffled-hand) (+ running-total (card-to-num (string (car shuffled-hand))))))))
+    (define (has-ace? hand)
+      (cond ((null? hand) #f)
+            ((equal? (string-ref (string (car hand)) 0) #\a) #t)
+            (else (has-ace? (cdr hand)))))
 
-    (best-total-helper (ace-shuffle hand) 0)
+    (if (and (or (equal? (total hand) 11)
+                 (< (total hand) 21))
+             (has-ace? hand))
+        (+ 10 (total hand))
+      (total hand))
   )
 
   (let ((deck (make-deck)))
