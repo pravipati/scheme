@@ -20,31 +20,6 @@
 			(se dealer-up-card (first rest-of-deck))
 			(bf rest-of-deck)))))
 
-  (define (best-total hand)
-    (define (card-to-num card)
-      (cond ((equal? (string-ref card 0) #\a) 1)
-            ((or (equal? (string-ref card 0) #\a)
-                 (equal? (string-ref card 0) #\j)
-                 (equal? (string-ref card 0) #\q)
-                 (equal? (string-ref card 0) #\k))
-              10)
-            (else (string->number (substring card 0 (- (string-length card) 1))))))
-
-    (define (total hand)
-      (if (null? hand) 0
-        (+ (card-to-num (string (car hand))) (total (cdr hand)))))
-
-    (define (has-ace? hand)
-      (cond ((null? hand) #f)
-            ((equal? (string-ref (string (car hand)) 0) #\a) #t)
-            (else (has-ace? (cdr hand)))))
-
-    (if (and (> 22 (+ 10 (total hand)))
-             (has-ace? hand))
-        (+ 10 (total hand))
-      (total hand))
-  )
-  
   (let ((deck (make-deck)))
     (play-customer (se (first deck) (first (bf deck)))
 		   (first (bf (bf deck)))
@@ -65,3 +40,74 @@
 	deck
     	(move-card deck '() (random size)) ))
   (shuffle (make-ordered-deck) 52) )
+
+(define (best-total hand)
+
+    (define (total hand)
+      (if (null? hand) 0
+        (+ (card-to-num (string (car hand))) (total (cdr hand)))))
+
+    (define (has-ace? hand)
+      (cond ((null? hand) #f)
+            ((equal? (string-ref (string (car hand)) 0) #\a) #t)
+            (else (has-ace? (cdr hand)))))
+
+    (if (and (> 22 (+ 10 (total hand)))
+             (has-ace? hand))
+        (+ 10 (total hand))
+      (total hand)))
+
+(define (card-to-num card)
+  (cond ((equal? (string-ref card 0) #\a) 1)
+  ((or (equal? (string-ref card 0) #\a)
+       (equal? (string-ref card 0) #\j)
+       (equal? (string-ref card 0) #\q)
+       (equal? (string-ref card 0) #\k))
+    10)
+  (else (string->number (substring card 0 (- (string-length card) 1))))))
+
+(define (stop-at-17 hand dealer-up-card)
+  ((stop-at 17) hand dealer-up-card))
+
+(define (stop-at n)
+  (lambda (hand dealer-up-card) (< (best-total hand) n)))
+
+(define (play-n strategy n)
+  (define (play-n-iter strategy n accum)
+    (if (= n 0) accum
+      (play-n-iter strategy (- n 1) (+ accum (twenty-one strategy)))))
+
+  (play-n-iter strategy n 0))
+
+(define (dealer-sensitive hand dealer-up-card)
+  (cond ((and (stop-at-17 hand dealer-up-card)
+              (or (> (best-total (cons dealer-up-card '())) 6)
+                  (= (best-total (cons dealer-up-card '())) 1))) #t)
+        ((and ((stop-at 12) hand dealer-up-card) 
+              (> (best-total (cons dealer-up-card '())) 1)) #t)
+        (else #f)))
+
+(define (valentine hand dealer-up-card)
+  (if (has-suit? hand 'h) ((stop-at 19) hand dealer-up-card)
+    ((stop-at 17) hand dealer-up-card)))
+
+(define (has-suit? hand suit)
+  (if (null? hand) #f
+    (or (equal? (last (first hand)) suit)
+        (has-suit? (bf hand) suit))))
+
+(define (suit-strategy suit primary secondary)
+  (lambda (hand dealer-up-card) 
+    (if (has-suit? hand suit) (primary hand dealer-up-card)
+      (secondary hand dealer-up-card))))
+
+(define (valentine2 hand dealer-up-card)
+  (suit-strategy 'h (stop-at 19) (stop-at 17)))
+
+(define (majority s1 s2 s3)
+  (lambda (hand dealer-up-card) 
+    (or (and (s1 hand dealer-up-card) (s2 hand dealer-up-card))
+        (s3 hand dealer-up-card))))
+
+(define (reckless strategy)
+  (lambda (hand dealer-up-card) (strategy (bl hand) dealer-up-card)))
