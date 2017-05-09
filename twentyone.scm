@@ -59,8 +59,7 @@
 
 (define (card-to-num card)
   (cond ((equal? (string-ref card 0) #\a) 1)
-  ((or (equal? (string-ref card 0) #\a)
-       (equal? (string-ref card 0) #\j)
+  ((or (equal? (string-ref card 0) #\j)
        (equal? (string-ref card 0) #\q)
        (equal? (string-ref card 0) #\k))
     10)
