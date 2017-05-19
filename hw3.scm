@@ -39,6 +39,8 @@
           (else (fast-expt-iter b (- n 1) (* b a)))))
   (fast-expt-iter b n 1))
 
-; 5. 
+; 5. product=b^(n−counter)
 
-; 6. 
+; 6. The result would be different when `amount` and `kinds-of-coins` are both 0
+; The reason is because switching the conditions would result in a 1 being returned for
+; those argument values whereas originally it would be 0
