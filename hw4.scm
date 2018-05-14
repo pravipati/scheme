@@ -62,8 +62,63 @@
   (if (empty? (cdr l)) l
     (last-pair (cdr l))))
 
-;2.20
+;2.20 running into an issue with dot-notation
 
+(define (same-parity divisor . l)
+  (print l)
+  (define (same-parity-helper divisor result l)
+    (cond ((empty? l) result)
+          ((= (remainder (car l)  divisor) 0) (same-parity-helper divisor (append result (list (car l))) (cdr l)))
+          (else (same-parity-helper divisor result (cdr l)))))
+  (same-parity-helper divisor '() l))
+
+;2.21
+
+(define (square-list items)
+  (if (null? items)
+    '()
+    (cons (square (car items)) (square-list (cdr items)))))
+
+(define (square-list items)
+  (map (lambda (x) (square x)) items))
 ;2.22
 
+(define (sqaure x) (* x x))
+
+(define (square-list items)
+  (define (iter things answer)
+    (if (null? things)
+      answer
+    (iter (cdr things)
+          (cons (square (car things))
+            answer ))))
+  (iter items '()))
+
+;The reason this comes out backwards is because cons adds an element to the front of an existing list and since this iterative implementation doesn't "cons-up" recursively, the answer displays as "backwards"
+
 ;2.23
+
+(define (for-each proc items)
+  (if (null? items) #t
+    (and (proc (car items))
+      (for-each proc (cdr items)))))
+
+;define substitute
+
+; first pass
+(define (substitute l old new)
+  (define (sub s old new)
+    (map (lambda (word) (if (equal? word old)  new word)) s))
+  
+  (map (lambda (item) (if (list? item) (sub item old new)
+    (if (equal? item old) new item))) l))
+
+;second pass
+(define (substitute l old new)
+  (cond ((null? l) '())
+        ((list? (car l)) (cons (substitute (car l) old new)
+                               (substitute (cdr l) old new)))
+        ((equal? (car l) old) (cons new (substitute (cdr l) old new)))
+        (else (cons (car l) (substitute (cdr l) old new)))))
+
+(define (substitute2))
