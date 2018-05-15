@@ -121,4 +121,20 @@
         ((equal? (car l) old) (cons new (substitute (cdr l) old new)))
         (else (cons (car l) (substitute (cdr l) old new)))))
 
-(define (substitute2))
+; define substitute2
+(define (substitute2 l old new)
+  (define (get-index i items)
+    (if (= i 1) (car items)
+      (get-index (- i 1) (cdr items))))  
+
+  (define (in-list? w i items)
+    (if (null? items) 0
+      (if (equal? (car items) w) i
+        (in-list? w (+ i 1) (cdr items)))))
+
+  (cond ((null? l) '())
+        ((list? (car l)) (cons (substitute2 (car l) old new)
+                               (substitute2 (cdr l) old new)))
+        ((> (in-list? (car l) 1 old) 0)  (cons (get-index (in-list? (car l) 1 old) new) 
+                                        (substitute2 (cdr l) old new)))
+        (else (cons (car l) (substitute2 (cdr l) old new)))))
