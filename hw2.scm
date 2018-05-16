@@ -62,7 +62,11 @@
     (else (cons (proc (car args))
           (every proc (cdr args))))))
 
-; extra for experts
+; extra for experts: write factorial without defining global names
 
-;(lambda (x) ((* x x))
+(lambda (num) 
+  ((lambda (x n result) (if (= n 0) result (x x (- n 1) (* result n))))
+   (lambda (x n result) (if (= n 0) result (x x (- n 1) (* result n)))) num 1))
+
+
 
